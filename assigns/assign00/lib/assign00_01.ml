@@ -1,8 +1,7 @@
-open OUnit2
+let sqrt (n : int) : int = 
+  let rec sqrt_rec (i : int) : int =
+    if i * i >= n then i
+    else sqrt_rec (i + 1)
+  in
+  sqrt_rec (0)
 
-let tests = "Testing Assign00" >:::
-  [ Test01.test_examples
-  ; Test02.test_examples
-  ]
-
-let _ = run_test_tt_main tests
