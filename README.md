@@ -1,20 +1,46 @@
 # CAS CS 320: Concepts of Programming Languages
 
 This is the course repository for CAS CS 320 at Boston University
-during the Fall 2024 semester.  We'll publish assignments, lecture
+during the Fall 2024 semester. We'll publish assignments, lecture
 materials and lab materials here.
 
-Follow the instructions below for setting up your machine.  If you are
+Follow the instructions below for setting up your machine. If you are
 a Windows user, we generally recommend setting up a [WSL development
 environment](https://learn.microsoft.com/en-us/windows/wsl/setup/environment).
 
 # Working with the Course Repository
 
 As a student, you'll mirror this repository and pull down assignments
-when they are made available.  You'll also need to link this
+when they are made available. You'll also need to link this
 repository with Gradescope to submit assignments.
 
 ## Mirroring this Repository
+
+0. The following instructions assume that you are set up to connect to GitHub using SSH.
+   See the [tutorials](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) in the GitHub docs for more information on how to do this.
+   If you don't want to use SSH, then you'll have to replace each repository with its web url, e.g., you should replace
+
+   ```
+   git@github.com:BU-CS320/cs320-fall-2024.git
+   ```
+
+   with
+
+   ```
+   https://github.com/BU-CS320/cs320-fall-2024.git
+   ```
+
+   and
+
+   ```
+   git@github.com:YOURNAME/cs320-fall-2024-private.git
+   ```
+
+   with
+
+   ```
+   https://github.com/YOURNAME/cs320-fall-2024-private.git
+   ```
 
 1. Clone this repository
 
@@ -28,19 +54,28 @@ repository with Gradescope to submit assignments.
 3. Mirror-push this repository into your private repository
 
    ```
-   git -C ./cs320-fall-2024 push --mirror git@github.com:nmmull/cs320-fall-2024-private.git
+   git -C ./cs320-fall-2024 push --mirror git@github.com:YOURNAME/cs320-fall-2024-private.git
    ```
 
 4. Clone your private repository
 
    ```
-   git clone git@github.com:nmmull/cs320-fall-2024-private.git
+   git clone git@github.com:YOURNAME/cs320-fall-2024-private.git
    ```
 
 5. Add **this** repository as a remote for your private repository
 
    ```
-   git -C ./cs320-spring-2024-private remote add upstream git@github.com:nmmull/cs320-fall-2024-private.git
+   git -C ./cs320-fall-2024-private remote add upstream git@github.com:BU-CS320/cs320-fall-2024.git
+   ```
+
+   **Note.** This was recently updated.
+   If you set it up with the previous command, you should remove that remote and add this remote instead.
+   This means running the following
+
+   ```
+   cd cs320-fall-2024-private remote remove upstream
+   git add remote upstream git@github.com:BU-CS320/cs320-fall-2024.git
    ```
 
 6. Remove the clone of this repository
@@ -53,7 +88,7 @@ You'll complete all the work for the course in your private repository.
 
 ## Syncing with the Course Repository
 
-When materials are added to the course repository, you;ll need merge
+When materials are added to the course repository, you'll need merge
 those changes into your private repository. **You should get in the
 habit of doing this frequently.**
 
@@ -62,8 +97,9 @@ following commands (you should check that you don't have any
 uncommitted changes in your directory).
 
 ```
+cd cs320-fall-2024-private
 git fetch upstream
-git merge upstream/main main
+git merge upstream/main main --allow-unrelated-histories
 git push
 ```
 
@@ -75,8 +111,8 @@ repository both locally and on Github.
 You should commit your changes frequently in your private repository
 (we'll assume familiarity with `git`, see the [git
 tutorial](https://git-scm.com/docs/gittutorial) for more information
-if you are unfamiliar).  Before you submit an assignment, **make sure
-that you've pushed all your changes** using `git push`.  On
+if you are unfamiliar). Before you submit an assignment, **make sure
+that you've pushed all your changes** using `git push`. On
 Gradescope, you'll be able to choose your private repository for
 grading.
 
@@ -85,11 +121,13 @@ grading.
 After you've mirrored the course repository, you'll set up your
 machine to be able to compile and run OCaml program.
 
-1. Install [opam](https://opam.ocaml.org/doc/Install.html)
+1. Install [opam](https://opam.ocaml.org/doc/Install.html).
+   Follow all the associated instructions, e.g., make sure to run `opam init`.
 
 2. Create a local switch in the directory for your private repository
 
    ```
+   cd cs320-fall-2024-private
    opam switch create ./ 4.13.1
    eval $(opam env)
    ```
@@ -97,12 +135,13 @@ machine to be able to compile and run OCaml program.
 3. Install the `dune`, `utop` and `ounit2`, which we will use throughout the course
 
    ```
+   opam update
    opam install dune utop ounit2
    ```
 
-4. Install the course standard library.  We include
+4. Install the course standard library. We include
    [documentation](https://nmmull.github.io/CS320/landing/Fall-2024/Specifications/Stdlib320/index.html)
-   for this library on the course webpage.  We'll grade assignments
+   for this library on the course webpage. We'll grade assignments
    under the assumption that you only have access to this library (the
    dune projects we release for assignments assume this as well, so
    you don't need to do any additional setup).
@@ -134,7 +173,9 @@ follows.
    eval $(opam env)
    ```
 
-3. Fill in your solutions, make sure to commit your changes frequently
+3. Fill in your solutions, make sure to commit your changes frequently.
+   _Note._ You will have to create your own files which satisfy the specification of the assignment.
+   You can verify that you've set everything up correctly if `dune build` doesn't show any errors when run in `assigns/assignXX`
 
 4. From within the assignment `lib` directory, frequently run `dune build`
    to type check your code
@@ -150,7 +191,7 @@ follows.
    assignment via Gradescope
 
 On Gradescope, you should see a message which says that your
-assignment was accepted.  You will not see any other information
+assignment was accepted. You will not see any other information
 there.
 
 ## Important: Your code must build to receive credit
