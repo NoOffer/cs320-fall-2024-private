@@ -20,7 +20,7 @@ type col_index =
 
 type pos_index = row_index * col_index
 
-let get_pos (b: board) (p: pos_index) : pos =
+let get_pos (bd: board) (p: pos_index) : pos =
     let get_pos_in_row (row: pos * pos * pos) (p: col_index) : pos =
         let (a, b, c) = row
         in
@@ -31,7 +31,7 @@ let get_pos (b: board) (p: pos_index) : pos =
     in
     let (row_idx, col_idx) = p
     in
-    let (a, b, c) = b
+    let (a, b, c) = bd
     in
     match row_idx with
     | Top     -> get_pos_in_row (a) (col_idx)
