@@ -18,7 +18,7 @@ let mk_matrix (es : float list) (dim : int * int) : matrix =
             if List.length (currr) >= c then mk_matrix_impl (e) ({currm with entries = append (currm.entries) (currr)}) ([])
             else match e with
                 | h::t -> mk_matrix_impl (t) (currm) (append (currr) (h))
-                | []   -> {currm with entries = append (currm.entries) (currr)}
+                | []   -> currm
         in
         mk_matrix_impl (es) ({entries = []; rows = r; cols = c}) ([])
     
