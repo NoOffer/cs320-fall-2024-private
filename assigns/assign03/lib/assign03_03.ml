@@ -2,16 +2,6 @@ type tree =
 | Leaf of int
 | Node of tree list
 
-let rec height (t : tree) =
-    let rec max_depth cs =
-        match cs with
-        | [] -> -1
-        | c :: cs -> max (height c) (max_depth cs)
-    in
-    match t with
-    | Leaf _  -> 0
-    | Node cs -> 1 + max_depth cs
-
 let collapse (i : int) (t : tree) : tree =
     let rec find_terminal (node : tree list) : tree list =
         match node with
@@ -27,7 +17,7 @@ let collapse (i : int) (t : tree) : tree =
             | Leaf _     -> h::collapse_impl (depth) (l)
             | Node child ->
                 if depth < i - 1 then
-                    collapse_impl (depth + 1) (child) @ collapse_impl (depth + 1) (l)
+                    collapse_impl (depth + 1) (child) @ collapse_impl (depth) (l)
                 else
                     find_terminal (child) @ collapse_impl (depth) (l)
     in
