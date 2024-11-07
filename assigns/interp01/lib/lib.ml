@@ -1,6 +1,9 @@
 open Utils
 open My_parser
 
+let parse (s : string) : expr option =
+    parse (s)
+
 let subst (v : value) (x : string) (e : expr) : expr =
     let rec is_fv_in (x : string) (e : expr) : bool =
         match e with
