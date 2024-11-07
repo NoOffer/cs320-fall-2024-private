@@ -4,15 +4,16 @@ open My_parser
 let subst (v : value) (x : string) (e : expr) : expr =
     let rec is_fv_in (x : string) (e : expr) : bool =
         match e with
-        | App (e1, e2)      -> (is_fv_in (x) (e1)) && (is_fv_in (x) (e2))
-        | Bop (_op, e1, e2) -> (is_fv_in (x) (e1)) && (is_fv_in (x) (e2))
-        | If  (c, et, ef)   -> (is_fv_in (x) (c)) && (is_fv_in (x) (et)) && (is_fv_in (x) (ef))
-        | Let (_x, e1, e2)  -> (is_fv_in (x) (e1)) && (is_fv_in (x) (e2))
+        | Var s             -> (x = s)
+        | App (e1, e2)      -> (is_fv_in (x) (e1)) || (is_fv_in (x) (e2))
+        | Bop (_op, e1, e2) -> (is_fv_in (x) (e1)) || (is_fv_in (x) (e2))
+        | If  (c, et, ef)   -> (is_fv_in (x) (c)) || (is_fv_in (x) (et)) || (is_fv_in (x) (ef))
+        | Let (_x, e1, e2)  -> (is_fv_in (x) (e1)) || (is_fv_in (x) (e2))
         | Fun (par, body)   -> (
             if (par = x) then false
             else              is_fv_in (x) (body)
         )
-        | _                 -> true
+        | _                 -> false
     in
     let rec subst_expr (ve : expr) (x : string) (e : expr) : expr =
         match e with
@@ -153,5 +154,5 @@ let rec eval (e : expr) : (value, error) result =
 
 let interp (input : string) : (value, error) result =
     match (parse (input)) with
-    | Some e -> eval (e)
+    | Some e -> (* let _ = print_ast (e) in *) eval (e)
     | _      -> Error (ParseFail)

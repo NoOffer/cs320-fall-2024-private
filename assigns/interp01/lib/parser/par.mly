@@ -66,6 +66,7 @@ expr:
   | e = expr2                                      { e }
 
 expr2:
+  | e1 = expr3; e2 = expr3*     { apply (e1) (e2) }
   | e1 = expr2; ADD; e2 = expr2 { Bop(Add, e1, e2) }
   | e1 = expr2; SUB; e2 = expr2 { Bop(Sub, e1, e2) }
   | e1 = expr2; MUL; e2 = expr2 { Bop(Mul, e1, e2) }
@@ -79,7 +80,6 @@ expr2:
   | e1 = expr2; NEQ; e2 = expr2 { Bop(Neq, e1, e2) }
   | e1 = expr2; AND; e2 = expr2 { Bop(And, e1, e2) }
   | e1 = expr2; OR; e2 = expr2  { Bop(Or, e1, e2) }
-  | e1 = expr3; e2 = expr3*     { apply (e1) (e2) }
 
 expr3:
   | UNIT                     { Unit }
