@@ -7,11 +7,6 @@ let parse (s : string) : expr option =
 let subst (v : value) (x : string) (e : expr) : expr =
     let rec is_fv_in (x : string) (e : expr) : bool =
         match e with
-        | Var s             -> (x = s)
-        | App (e1, e2)      -> (is_fv_in (x) (e1)) || (is_fv_in (x) (e2))
-        | Bop (_op, e1, e2) -> (is_fv_in (x) (e1)) || (is_fv_in (x) (e2))
-        | If  (c, et, ef)   -> (is_fv_in (x) (c)) || (is_fv_in (x) (et)) || (is_fv_in (x) (ef))
-        | Let (_x, e1, e2)  -> (is_fv_in (x) (e1)) || (is_fv_in (x) (e2))
         | Fun (par, body)   -> (
             if (par = x) then false
             else              is_fv_in (x) (body)
@@ -28,7 +23,7 @@ let subst (v : value) (x : string) (e : expr) : expr =
         | Bop (op, e1, e2) -> Bop (op, (subst_expr (ve) (x) (e1)), (subst_expr (ve) (x) (e2)))
         | If  (c, et, ef)  -> If ((subst_expr (ve) (x) (c)), (subst_expr (ve) (x) (et)), (subst_expr (ve) (x) (ef)))
         | Let (nx, e1, e2) -> (
-            if (nx = x) then e
+            if (nx = x) then Let (nx, (subst_expr (ve) (x) (e1)), e2)
             else             Let (nx, (subst_expr (ve) (x) (e1)), (subst_expr (ve) (x) (e2)))
         )
         | Fun (par, body)  -> (
