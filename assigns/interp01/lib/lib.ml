@@ -5,6 +5,16 @@ let parse (s : string) : expr option =
     parse (s)
 
 let subst (v : value) (x : string) (e : expr) : expr =
+    let rec rename (new_name : string) (old_name : string) (e : expr) : expr =
+        match e with
+        | Var var_name     -> if (var_name = old_name) then (Var (new_name)) else e
+        | App (e1, e2)     -> App ((rename (new_name) (old_name) (e1)), (rename (new_name) (old_name) (e2)))
+        | Bop (op, e1, e2) -> Bop (op, (rename (new_name) (old_name) (e1)), (rename (new_name) (old_name) (e2)))
+        | If  (c, et, ef)  -> If ((rename (new_name) (old_name) (c)), (rename (new_name) (old_name) (et)), (rename (new_name) (old_name) (ef)))
+        | Let (lx, e1, e2) -> Let (lx, (rename (new_name) (old_name) (e1)), if (lx = old_name) then e2 else (rename (new_name) (old_name) (e2)))
+        | Fun (par, body)  -> Fun (par, if (par = old_name) then body else (rename (new_name) (old_name) (body)))
+        | _                -> e
+    in
     let rec subst_expr (ve : expr) (x : string) (e : expr) : expr =
         match e with
         | Var var_name     -> (
@@ -19,7 +29,7 @@ let subst (v : value) (x : string) (e : expr) : expr =
             else (
                 let new_x = gensym ()
                 in
-                Let (new_x, (subst_expr (ve) (x) (e1)), (subst_expr (ve) (x) (subst_expr (Var (new_x)) (lx) (e2))))
+                Let (new_x, (subst_expr (ve) (x) (e1)), (subst_expr (ve) (x) (rename (new_x) (lx) (e2))))
             )
         )
         | Fun (par, body)  -> (
@@ -27,7 +37,7 @@ let subst (v : value) (x : string) (e : expr) : expr =
             else (
                 let new_par = gensym ()
                 in
-                Fun (new_par, (subst_expr (ve) (x) (subst_expr (Var (new_par)) (par) (body))))
+                Fun (new_par, (subst_expr (ve) (x) (rename (new_par) (par) (body))))
             )
         )
         | _                -> e
