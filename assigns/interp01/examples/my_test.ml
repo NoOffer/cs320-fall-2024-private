@@ -1,3 +1,5 @@
-let f = fun a -> let a = 3 in a
+let f = fun a -> a + b
 in
-f let b = 2 in b
+let b = 3
+in
+f 8

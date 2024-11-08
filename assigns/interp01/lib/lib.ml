@@ -5,14 +5,6 @@ let parse (s : string) : expr option =
     parse (s)
 
 let subst (v : value) (x : string) (e : expr) : expr =
-    let rec is_fv_in (x : string) (e : expr) : bool =
-        match e with
-        | Fun (par, body)   -> (
-            if (par = x) then false
-            else              is_fv_in (x) (body)
-        )
-        | _                 -> false
-    in
     let rec subst_expr (ve : expr) (x : string) (e : expr) : expr =
         match e with
         | Var var_name     -> (
@@ -22,18 +14,21 @@ let subst (v : value) (x : string) (e : expr) : expr =
         | App (e1, e2)     -> App ((subst_expr (ve) (x) (e1)), (subst_expr (ve) (x) (e2)))
         | Bop (op, e1, e2) -> Bop (op, (subst_expr (ve) (x) (e1)), (subst_expr (ve) (x) (e2)))
         | If  (c, et, ef)  -> If ((subst_expr (ve) (x) (c)), (subst_expr (ve) (x) (et)), (subst_expr (ve) (x) (ef)))
-        | Let (nx, e1, e2) -> (
-            if (nx = x) then Let (nx, (subst_expr (ve) (x) (e1)), e2)
-            else             Let (nx, (subst_expr (ve) (x) (e1)), (subst_expr (ve) (x) (e2)))
+        | Let (lx, e1, e2) -> (
+            if (lx = x) then Let (lx, (subst_expr (ve) (x) (e1)), e2)
+            else (
+                let new_x = gensym ()
+                in
+                Let (new_x, (subst_expr (ve) (x) (e1)), (subst_expr (ve) (x) (subst_expr (Var (new_x)) (lx) (e2))))
+            )
         )
         | Fun (par, body)  -> (
             if (par = x) then e
-            else if (is_fv_in (par) (ve)) then (
+            else (
                 let new_par = gensym ()
                 in
-                subst_expr (ve) (x) (Fun (new_par, (subst_expr (Var (new_par)) (par) (body))))
+                Fun (new_par, (subst_expr (ve) (x) (subst_expr (Var (new_par)) (par) (body))))
             )
-            else Fun (par, (subst_expr (ve) (x) (body)))
         )
         | _                -> e
     in
