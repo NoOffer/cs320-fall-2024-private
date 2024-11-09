@@ -101,8 +101,15 @@ let print_ast (e : expr) : unit =
       | If    (c, et, ef)  -> (
         let _ = print_string (prefix_inhe ^ prefix_curr) in
         let _ = print_endline ("IF") in
+
         let _ = print_ast_impl (c) (prefix_inhe ^ prefix_inc) (" ├─") in
+
+        let _ = print_endline (prefix_inhe ^ prefix_inc ^ "THEN") in
+
         let _ = print_ast_impl (et) (prefix_inhe ^ prefix_inc) (" ├─") in
+
+        let _ = print_endline (prefix_inhe ^ prefix_inc ^ "ELSE") in
+
         print_ast_impl (ef) (prefix_inhe ^ prefix_inc) (" └─")
       )
       | Let   (x, e1, e2)  -> (

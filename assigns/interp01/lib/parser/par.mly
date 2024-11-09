@@ -5,6 +5,13 @@ let rec apply (e : expr) (es : expr list) : expr =
   match es with
   | []       -> e
   | eh :: et -> apply (App (e, eh)) et
+
+let build_rec (fun_name : string) (e1 : expr) (e2 : expr) : expr =
+  let y_combinator = Fun ("f", App((Fun ("g", App (Var ("f"), App(Var ("g"), Var ("g"))))), (Fun ("g",App (Var ("f"), App(Var ("g"), Var ("g")))))))
+  in
+  match e1 with
+  | Fun _ -> Let (fun_name, App (y_combinator, Fun (fun_name, e1)), e2)
+  | _     -> Let (fun_name, (Var (fun_name)), e2) (* Do NOT allow "rec" to be called on non-functions *)
 %}
 
 %token <int> NUM
@@ -37,6 +44,7 @@ let rec apply (e : expr) (es : expr list) : expr =
 %token ELSE
 
 %token LET
+%token REC
 %token IN
 
 %token FUN
@@ -60,10 +68,11 @@ prog:
   | e = expr; EOF {e}
 
 expr:
-  | IF; c = expr; THEN; e1 = expr; ELSE; e2 = expr { If(c, e1, e2) }
-  | LET; v = VAR; EQL; e1 = expr; IN; e2 = expr    { Let(v, e1, e2) }
-  | FUN; v = VAR; TOR; e = expr                    { Fun(v, e) }
-  | e = expr2                                      { e }
+  | IF; c = expr; THEN; e1 = expr; ELSE; e2 = expr   { If(c, e1, e2) }
+  | LET; v = VAR; EQL; e1 = expr; IN; e2 = expr      { Let(v, e1, e2) }
+  | LET; REC; v = VAR; EQL; e1 = expr; IN; e2 = expr { (build_rec (v) (e1) (e2)) }
+  | FUN; v = VAR; TOR; e = expr                      { Fun(v, e) }
+  | e = expr2                                        { e }
 
 expr2:
   | e1 = expr3; e2 = expr3*     { apply (e1) (e2) }

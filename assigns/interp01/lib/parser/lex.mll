@@ -37,6 +37,7 @@ rule read =
   | "else"     { ELSE }
 
   | "let"      { LET }
+  | "rec"      { REC }
   | "in"       { IN }
   | "fun"      { FUN }
   | "->"       { TOR }

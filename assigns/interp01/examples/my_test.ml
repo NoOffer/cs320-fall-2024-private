@@ -1,5 +1,4 @@
-let f = fun a -> a + b
-in
-let b = 3
-in
-f 8
+let rec fact = fun n->
+    if n <= 0 then 1
+    else n * fact (n- 1)
+in fact 5

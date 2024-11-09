@@ -4,8 +4,7 @@ open My_parser
 let parse (s : string) : expr option =
     parse (s)
 
-let subst (v : value) (x : string) (e : expr) : expr =
-    let rec subst_expr (ve : expr) (x : string) (e : expr) : expr =
+let rec subst_expr (ve : expr) (x : string) (e : expr) : expr =
         match e with
         | Var var_name     -> (
             if (var_name = x) then ve
@@ -31,7 +30,8 @@ let subst (v : value) (x : string) (e : expr) : expr =
             )
         )
         | _                -> e
-    in
+
+let subst (v : value) (x : string) (e : expr) : expr =
     let ve = match v with
         | VNum  n           -> Num (n)
         | VBool b           -> (
@@ -55,15 +55,7 @@ let rec eval (e : expr) : (value, error) result =
         | Ok v1    -> (
             match v1 with
             | VFun (par, body) -> (
-                match (eval (e2)) with
-                | Ok v2    -> (
-                    let e_sub = subst (v2) (par) (body)
-                    in
-                    let _ = print_ast (e_sub)
-                    in
-                    eval (subst (v2) (par) (body))
-                )
-                | Error er -> Error (er)
+                eval (subst_expr (e2) (par) (body))
             )
             | _               -> Error (InvalidApp)
         )
@@ -147,10 +139,10 @@ let rec eval (e : expr) : (value, error) result =
     | Let   (x, e1, e2)  -> (
         match (eval (e1)) with
         | Ok v     -> (
-            let e_sub = subst (v) (x) (e2)
+            (* let e_sub = subst (v) (x) (e2)
             in
             let _ = print_ast (e_sub)
-            in
+            in *)
             eval (subst (v) (x) (e2))
         )
         | Error er -> Error (er)
@@ -159,5 +151,5 @@ let rec eval (e : expr) : (value, error) result =
 
 let interp (input : string) : (value, error) result =
     match (parse (input)) with
-    | Some e -> let _ = print_ast (e) in eval (e)
+    | Some e -> (* let _ = print_ast (e) in *) eval (e)
     | _      -> Error (ParseFail)
