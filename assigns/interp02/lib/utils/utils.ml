@@ -160,3 +160,75 @@ let err_msg = function
     ^ string_of_ty ty
     ^ " but an expression was expected of type bool"
 
+let print_expr (e : expr) : unit =
+  let rec print_expr_impl (e : expr) (prefix_inhe : string) (prefix_curr : string) : unit =
+    let prefix_inc = if (prefix_curr = " ├─") then " │ " else "   "
+    in
+    let _ = print_string (prefix_inhe ^ prefix_curr)
+    in
+    match e with
+      | Num    n               -> (
+        let _ = print_string ("NUM ") in
+        print_endline (string_of_int (n))
+      )
+      | Var    s               -> (
+        let _ = print_string ("VAR ") in
+        print_endline (s)
+      )
+      | Unit                  -> (
+        print_endline ("()")
+      )
+      | True                  -> (
+        print_endline ("True")
+      )
+      | False                 -> (
+        print_endline ("False")
+      )
+      | App    (e1, e2)        -> (
+        let _ = print_endline ("APP") in
+        let _ = print_expr_impl (e1) (prefix_inhe ^ prefix_inc) (" ├─") in
+        print_expr_impl (e2) (prefix_inhe ^ prefix_inc) (" └─")
+      )
+      | Bop    (op, e1, e2)    -> (
+        let _ = print_endline ("BOP" ^ string_of_bop (op)) in
+        let _ = print_expr_impl (e1) (prefix_inhe ^ prefix_inc) (" ├─") in
+        print_expr_impl (e2) (prefix_inhe ^ prefix_inc) (" └─")
+      )
+      | If     (c, et, ef)     -> (
+        let _ = print_endline ("IF") in
+
+        let _ = print_expr_impl (c) (prefix_inhe ^ prefix_inc) (" ├─") in
+
+        let _ = print_endline (prefix_inhe ^ prefix_inc ^ "THEN") in
+
+        let _ = print_expr_impl (et) (prefix_inhe ^ prefix_inc) (" ├─") in
+
+        let _ = print_endline (prefix_inhe ^ prefix_inc ^ "ELSE") in
+
+        print_expr_impl (ef) (prefix_inhe ^ prefix_inc) (" └─")
+      )
+      | Let    l               -> (
+        let _ = print_endline ("LET ") in
+
+        let _ = print_string (prefix_inhe ^ "   ") in
+        let _ = print_endline (" ├─VAR " ^ l.name ^ " : " ^ (string_of_ty (l.ty))) in
+
+        let _ = print_endline (prefix_inhe ^ prefix_inc ^ "EQUAL") in
+
+        let _ = print_expr_impl (l.value) (prefix_inhe ^ prefix_inc) (" ├─") in
+
+        let _ = print_endline (prefix_inhe ^ prefix_inc ^ "WITHIN") in
+
+        print_expr_impl (l.body) (prefix_inhe ^ prefix_inc) (" └─")
+      )
+      | Fun    (par, ty, body) -> (
+        let _ = print_endline ("FUNC OF " ^ par ^ " : " ^ (string_of_ty (ty))) in
+        print_expr_impl (body) (prefix_inhe ^ prefix_inc) (" └─")
+      )
+      | Assert cond            -> (
+        let _ = print_endline ("ASSERT") in
+        print_expr_impl (cond) (prefix_inhe ^ prefix_inc) (" └─")
+      )
+  in
+  print_expr_impl (e) ("") ("   ")
+
