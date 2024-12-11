@@ -69,23 +69,12 @@ let unify (in_ty : ty) (cs : constr list) : ty_scheme option =
   match (unify_impl (cs) ([])) with
   | None   -> None
   | Some s -> let final_ty = apply_s (s) (in_ty)
+    (* in
+    let _ = print_endline (string_of_ty (final_ty)) *)
     in
     Some (Forall ((quantify (final_ty)), final_ty))
 
 let type_of (ctx : stc_env) (e : expr) : ty_scheme option =
-  let var_type_replace (in_ty : ty_scheme) : ty =
-    let rec var_type_replace_impl (fvs : ident list) (in_ty : ty) : ty =
-      match fvs with
-      | []    -> in_ty
-      | x::xs -> (
-        let fresh = TVar (gensym())
-        in
-        var_type_replace_impl (xs) (type_subst (x) (fresh) (in_ty))
-      )
-    in
-    match in_ty with
-    | Forall (fvs, t) -> var_type_replace_impl (fvs) (t)
-  in
   let rec type_of_impl (ctx : stc_env) (e : expr) : (ty * constr list) =
     let (t, c) = match e with
     | Unit                                 -> (TUnit, [])
@@ -97,9 +86,9 @@ let type_of (ctx : stc_env) (e : expr) : ty_scheme option =
     | Int _n                               -> (TInt, [])
     | Float _n                             -> (TFloat, [])
     | Var v                                -> (
-      let t_s = Env.find (v) (ctx)
+      let Forall (_q, t) = Env.find (v) (ctx)
       in
-      (var_type_replace (t_s), [])
+      (t, [])
     )
     | Assert e                             -> (
       if (e = False) then (TVar (gensym()), [])
@@ -224,6 +213,10 @@ let type_of (ctx : stc_env) (e : expr) : ty_scheme option =
         (t2, c1@c2)
     )
     in
+    (* let _ = print_expr (e)
+    in
+    let _ = print_string (string_of_ty (t)) in let _ = print_constrs (c)
+    in *)
     (t, c)
   in
   let (t, c) = type_of_impl (ctx) (e)
