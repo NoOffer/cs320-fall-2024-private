@@ -283,7 +283,9 @@ let eval_expr (ev : dyn_env) (e : expr) : value =
           | _    -> raise TypeExn
         )
         | VClos _c -> raise CompareFunVals
-        | _        -> raise TypeExn
+        | _        -> match op with
+          | Comma -> VPair ((VInt (n1)), (eval_impl (e2) (ev)))
+          | _     -> raise TypeExn
       )
       (* Float *)
       | VFloat n1  -> (
@@ -310,7 +312,9 @@ let eval_expr (ev : dyn_env) (e : expr) : value =
           | _    -> raise TypeExn
         )
         | VClos _c -> raise CompareFunVals
-        | _        -> raise TypeExn
+        | _        -> match op with
+          | Comma -> VPair ((VFloat (n1)), (eval_impl (e2) (ev)))
+          | _     -> raise TypeExn
       )
       (* Boolean Operations *)
       | VBool b1 -> (
@@ -358,6 +362,36 @@ let eval_expr (ev : dyn_env) (e : expr) : value =
       (* List Operations *)
       | VList l1 -> (
         match op with
+        | Lt    -> (
+          match (eval_impl (e2) (ev)) with
+          | VList l2 -> VBool (l1 < l2)
+          | _        -> raise TypeExn
+        )
+        | Lte   -> (
+          match (eval_impl (e2) (ev)) with
+          | VList l2 -> VBool (l1 <= l2)
+          | _        -> raise TypeExn
+        )
+        | Gt    -> (
+          match (eval_impl (e2) (ev)) with
+          | VList l2 -> VBool (l1 > l2)
+          | _        -> raise TypeExn
+        )
+        | Gte   -> (
+          match (eval_impl (e2) (ev)) with
+          | VList l2 -> VBool (l1 >= l2)
+          | _        -> raise TypeExn
+        )
+        | Eq    -> (
+          match (eval_impl (e2) (ev)) with
+          | VList l2 -> VBool (l1 = l2)
+          | _        -> raise TypeExn
+        )
+        | Neq   -> (
+          match (eval_impl (e2) (ev)) with
+          | VList l2 -> VBool (l1 <> l2)
+          | _        -> raise TypeExn
+        )
         | Cons  -> (
             match (eval_impl (e2) (ev)) with
             | VList l -> VList ((VList (l1))::l)
@@ -368,25 +402,45 @@ let eval_expr (ev : dyn_env) (e : expr) : value =
           | VList l2 -> VList (l1@l2)
           | _        -> raise TypeExn
         )
-        | Eq     -> (
-          match (eval_impl (e2) (ev)) with
-          | VList l2 -> VBool (l1 = l2)
-          | _        -> raise TypeExn
-        )
         | _      -> raise TypeExn
       )
       | VPair (a, b) -> (
         match op with
+        | Lt    -> (
+          match (eval_impl (e2) (ev)) with
+          | VPair (c, d) -> VBool ((a, b) < (c, d))
+          | _            -> raise TypeExn
+        )
+        | Lte   -> (
+          match (eval_impl (e2) (ev)) with
+          | VPair (c, d) -> VBool ((a, b) <= (c, d))
+          | _            -> raise TypeExn
+        )
+        | Gt    -> (
+          match (eval_impl (e2) (ev)) with
+          | VPair (c, d) -> VBool ((a, b) > (c, d))
+          | _            -> raise TypeExn
+        )
+        | Gte   -> (
+          match (eval_impl (e2) (ev)) with
+          | VPair (c, d) -> VBool ((a, b) >= (c, d))
+          | _            -> raise TypeExn
+        )
+        | Eq     -> (
+          match (eval_impl (e2) (ev)) with
+          | VPair (c, d) -> VBool ((a, b) = (c, d))
+          | _            -> raise TypeExn
+        )
+        | Neq   -> (
+          match (eval_impl (e2) (ev)) with
+          | VPair (c, d) -> VBool ((a, b) <> (c, d))
+          | _            -> raise TypeExn
+        )
         | Cons  -> (
             match (eval_impl (e2) (ev)) with
             | VList l -> VList ((VPair (a, b))::l)
             | _       -> raise TypeExn
           )
-        | Eq     -> (
-          match (eval_impl (e2) (ev)) with
-          | VPair (c, d) -> VBool ((a = c) && (b = d))
-          | _            -> raise TypeExn
-        )
         | _      -> raise TypeExn
       )
       | VClos c  -> (
@@ -396,8 +450,9 @@ let eval_expr (ev : dyn_env) (e : expr) : value =
             | VList l -> VList ((VClos (c))::l)
             | _       -> raise TypeExn
           )
-        | Comma -> VPair (VClos (c), (eval_impl (e2) (ev)))
-        | _     -> raise CompareFunVals
+        | _     -> match op with
+          | Comma -> VPair ((VClos (c)), (eval_impl (e2) (ev)))
+          | _     -> raise TypeExn
       )
       | VNone    -> (
         match op with
@@ -416,10 +471,40 @@ let eval_expr (ev : dyn_env) (e : expr) : value =
       )
       | VSome s0 -> (
         match op with
+        | Lt    -> (
+            match (eval_impl (e2) (ev)) with
+            | VNone    -> VBool (false)
+            | VSome s1 -> VBool (s0 < s1)
+            | _        -> raise TypeExn
+          )
+        | Lte   -> (
+            match (eval_impl (e2) (ev)) with
+            | VNone    -> VBool (false)
+            | VSome s1 -> VBool (s0 <= s1)
+            | _        -> raise TypeExn
+          )
+        | Gt    -> (
+            match (eval_impl (e2) (ev)) with
+            | VNone    -> VBool (false)
+            | VSome s1 -> VBool (s0 > s1)
+            | _        -> raise TypeExn
+          )
+        | Gte   -> (
+            match (eval_impl (e2) (ev)) with
+            | VNone    -> VBool (false)
+            | VSome s1 -> VBool (s0 >= s1)
+            | _        -> raise TypeExn
+          )
         | Eq    -> (
             match (eval_impl (e2) (ev)) with
             | VNone    -> VBool (false)
             | VSome s1 -> VBool (s0 = s1)
+            | _        -> raise TypeExn
+          )
+        | Neq   -> (
+            match (eval_impl (e2) (ev)) with
+            | VNone    -> VBool (false)
+            | VSome s1 -> VBool (s0 <> s1)
             | _        -> raise TypeExn
           )
         | Cons  -> (
@@ -432,11 +517,16 @@ let eval_expr (ev : dyn_env) (e : expr) : value =
       )
       | VUnit    -> (
         match op with
+        | Lt    -> VBool (false)
+        | Lte   -> VBool (true)
+        | Gt    -> VBool (false)
+        | Gte   -> VBool (true)
         | Eq    -> (
             match (eval_impl (e2) (ev)) with
             | VUnit -> VBool (true)
             | _     -> VBool (false)
           )
+        | Neq   -> VBool (false)
         | Cons  -> (
             match (eval_impl (e2) (ev)) with
             | VList l -> VList ((VUnit)::l)
